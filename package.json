@@ -9,15 +9,131 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "stepPanel",
+          "title": "Passos",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "stepPanel": [
+        {
+          "id": "stepView",
+          "name": "Etapas do Código"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "step-by-step-code.helloWorld",
-        "title": "Hello World"
+        "command": "stepByStep.addStep",
+        "title": "Adicionar Passo",
+        "icon": {
+          "light": "media/add-dark.svg",
+          "dark": "media/add-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.nextStep",
+        "title": "Próximo Passo",
+        "icon": {
+          "light": "media/next-dark.svg",
+          "dark": "media/next-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.prevStep",
+        "title": "Passo Anterior",
+        "icon": {
+          "light": "media/prev-dark.svg",
+          "dark": "media/prev-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.resetSteps",
+        "title": "Resetar Passos",
+        "icon": {
+          "light": "media/reset-dark.svg",
+          "dark": "media/reset-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.deleteStep",
+        "title": "Excluir Passo",
+        "icon": {
+          "light": "media/trash-dark.svg",
+          "dark": "media/trash-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.renameStep",
+        "title": "Renomear Passo",
+        "icon": {
+          "light": "media/rename-dark.svg",
+          "dark": "media/rename-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.editStep",
+        "title": "Editar Passo",
+        "icon": {
+          "light": "media/edit-dark.svg",
+          "dark": "media/edit-dark.svg"
+        }
+      },
+      {
+        "command": "stepByStep.executeStep",
+        "title": "Executar Passo"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "stepByStep.resetSteps",
+          "when": "view == stepView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "stepByStep.prevStep",
+          "when": "view == stepView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "stepByStep.nextStep",
+          "when": "view == stepView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "stepByStep.addStep",
+          "when": "view == stepView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "stepByStep.deleteStep",
+          "when": "view == stepView",
+          "group": "inline"
+        },
+        {
+          "command": "stepByStep.renameStep",
+          "when": "viewItem == stepItem",
+          "group": "inline"
+        },
+        {
+          "command": "stepByStep.editStep",
+          "when": "viewItem == stepItem",
+          "group": "inline"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
