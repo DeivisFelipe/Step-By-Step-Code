@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 
 class StepItem extends vscode.TreeItem {
+	public language: string = "javascript";
+
 	constructor(
 		public label: string,
 		public title: string,
@@ -138,7 +140,7 @@ class StepProvider implements vscode.TreeDataProvider<StepItem> {
 			}
 		);
 
-		panel.webview.html = this.getWebviewContent(item.title, item.content);
+		panel.webview.html = this.getWebviewContent(item);
 
 		panel.webview.onDidReceiveMessage(
 			message => {
@@ -156,44 +158,118 @@ class StepProvider implements vscode.TreeDataProvider<StepItem> {
 		);
 	}
 
-	private getWebviewContent(title: string, content: string): string {
-		const escaped = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	private getWebviewContent(item: StepItem): string {
+		const escaped = item.content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		return `
 			<!DOCTYPE html>
-			<html lang="en">
-			<head>
+				<html lang="en">
+				<head>
 				<meta charset="UTF-8">
-				<title>${title}</title>
+				<title>${item.title}</title>
 				<style>
-					body { font-family: sans-serif; margin: 0; padding: 0; }
-					textarea {
-						width: 100%;
-						height: 95vh;
-						font-family: monospace;
-						font-size: 14px;
-						padding: 1em;
-						box-sizing: border-box;
-						border: none;
-						outline: none;
-						resize: none;
-					}
+				html, body {
+					height: 100%;
+					margin: 0;
+					padding: 0 20px;
+					font-family: sans-serif;
+					background: #1e1e1e;
+					color: #fff;
+				}
+				h3 span { font-weight: normal; }
+				#editor { width: 100%; height: 500px; border: 1px solid #444; }
+				label { margin-right: 10px; }
+				select, input[type="number"] { padding: 5px; margin-right: 15px; }
+				.switch-label { display: flex; align-items: center; margin: 5px 0; cursor: pointer; }
+				.switch-label input { margin-right: 10px; }
+				#controls { margin-top: 10px; }
+				button { padding: 8px 16px; margin-top: 15px; cursor: pointer; background-color: #007acc; color: white; border: none; border-radius: 4px; }
+				button:hover { background-color: #005a9e; }
+				#animation-time { display: none; width: 60px; }
 				</style>
-			</head>
-			<body>
-				<textarea id="editor">${escaped}</textarea>
-				<script>
-					const vscode = acquireVsCodeApi();
-					const textarea = document.getElementById('editor');
+				<script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+				</head>
+				<body>
 
-					window.addEventListener('keydown', (e) => {
-						if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-							e.preventDefault();
-							vscode.postMessage({ command: 'save', content: textarea.value });
-						}
-					});
+				<h3><span>Passo:</span> <span style="font-size: 1.5em">${item.title}</span></h3>
+
+				<div id="controls">
+				<label for="language">Linguagem:</label>
+				<select id="language">
+					<option value="javascript">JavaScript</option>
+					<option value="typescript">TypeScript</option>
+					<option value="python">Python</option>
+					<option value="java">Java</option>
+					<option value="csharp">C#</option>
+				</select>
+
+				<label class="switch-label">
+					<input type="checkbox" id="delete-previous"> Deletar conteúdo anterior
+				</label>
+				<label class="switch-label">
+					<input type="checkbox" id="keep-indentation"> Manter indentação
+				</label>
+				<label class="switch-label">
+					<input type="checkbox" id="enable-animation"> Animação de escrita
+					<input type="number" id="animation-time" min="10" value="50"> ms
+				</label>
+				</div>
+
+				<div id="editor"></div>
+
+				<button id="saveBtn">💾 Salvar</button>
+
+				<script>
+				const vscode = acquireVsCodeApi();
+				let editor;
+
+				require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
+				require(['vs/editor/editor.main'], function () {
+				editor = monaco.editor.create(document.getElementById('editor'), {
+					value: \`${escaped}\`,
+					language: '${item.language}',
+					theme: 'vs-dark',
+					automaticLayout: true
+				});
+
+				// Atalho CTRL+S / CMD+S
+				window.addEventListener('keydown', (e) => {
+					if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+					e.preventDefault();
+					sendSave();
+					}
+				});
+				});
+
+				// Troca de linguagem
+				document.getElementById('language').addEventListener('change', (event) => {
+				const newLanguage = event.target.value;
+				if (editor) {
+					monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
+				}
+				});
+
+				// Mostrar input de tempo apenas se animação estiver ativa
+				document.getElementById('enable-animation').addEventListener('change', (e) => {
+				document.getElementById('animation-time').style.display = e.target.checked ? 'inline-block' : 'none';
+				});
+
+				// Botão salvar
+				document.getElementById('saveBtn').addEventListener('click', sendSave);
+
+				function sendSave() {
+				vscode.postMessage({
+					command: 'save',
+					content: editor ? editor.getValue() : '',
+					deletePrevious: document.getElementById('delete-previous').checked,
+					keepIndentation: document.getElementById('keep-indentation').checked,
+					enableAnimation: document.getElementById('enable-animation').checked,
+					animationTime: parseInt(document.getElementById('animation-time').value || 50)
+				});
+				}
 				</script>
-			</body>
-			</html>
+
+				</body>
+				</html>
 		`;
 	}
 
