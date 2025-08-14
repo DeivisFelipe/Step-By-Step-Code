@@ -3,11 +3,12 @@
   "displayName": "step-by-step-code",
   "description": "A step by step code to improve your class",
   "publisher": "DeivisFelipe",
+  "icon": "media/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/DeivisFelipe/step-by-step-code.git"
   },
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.102.0"
   },
