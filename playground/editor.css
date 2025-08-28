@@ -21,25 +21,6 @@ body {
     margin-bottom: 50px;
 }
 
-button {
-    padding: 8px 16px;
-    margin-top: 15px;
-    cursor: pointer;
-    background-color: #007acc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-}
-
-button:hover {
-    background-color: #005a9e;
-}
-
-#animation-time {
-    display: none;
-    width: 60px;
-}
-
 /* Estilo do select */
 #language {
     background: #252526;
@@ -108,4 +89,19 @@ input:checked+.switch-label .switch-slider {
 
 input:checked+.switch-label .switch-slider:before {
     transform: translateX(26px);
+}
+
+.btn {
+    padding: 13px 25px;
+    margin-top: 15px;
+    cursor: pointer;
+    background-color: #0b8300;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: medium;
+}
+
+.btn:hover {
+    background-color: #096301;
 }
