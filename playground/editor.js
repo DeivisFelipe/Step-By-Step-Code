@@ -37,6 +37,5 @@ function sendSave() {
         deletePrevious: document.getElementById('delete-previous').checked,
         keepIndentation: document.getElementById('keep-indentation').checked,
         enableAnimation: document.getElementById('enable-animation').checked,
-        animationTime: parseInt(document.getElementById('animation-time').value || 50)
     });
 }
