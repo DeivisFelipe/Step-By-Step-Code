@@ -163,6 +163,11 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         const cssUri = panel.webview.asWebviewUri(cssPath);
         const jsUri = panel.webview.asWebviewUri(jsPath);
 
+        const monacoPath = vscode.Uri.file(
+            path.join(__dirname, '../webview/monaco')
+        );
+        const monacoUri = panel.webview.asWebviewUri(monacoPath);
+
         // Adicionar Content Security Policy
         const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src ${panel.webview.cspSource} https:;">`;
 
@@ -171,7 +176,8 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
             .replace(/{{CONTENT}}/g, escaped)
             .replace(/{{CSS_URI}}/g, cssUri.toString())
             .replace(/{{JS_URI}}/g, jsUri.toString())
-            .replace('{{CSP_META}}', cspMeta);
+            .replace('{{CSP_META}}', cspMeta)
+            .replace('{{MONACO_URI}}', monacoUri.toString());
 
         return html;
     }

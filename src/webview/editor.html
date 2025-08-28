@@ -6,7 +6,7 @@
     <title>{{TITLE}}</title>
     {{CSP_META}}
     <link rel="stylesheet" href="{{CSS_URI}}">
-    <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    </link>
 </head>
 
 <body>
@@ -64,6 +64,10 @@
     <div id="editor"></div>
 
     <button class="btn">💾 SAVE</button>
+
+    <script>
+        require.config({ paths: { vs: '{{MONACO_URI}}/vs' } });
+    </script>
 
     <script src="{{JS_URI}}"></script>
 </body>

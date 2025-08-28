@@ -1,8 +1,11 @@
 const vscode = acquireVsCodeApi();
 let editor;
 
-require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
-require(['vs/editor/editor.main'], function () {
+// O Monaco já existe no VS Code, então não precisamos do require.config nem do unpkg
+// Basta usar 'monaco' diretamente quando o Webview carregar
+
+window.addEventListener('load', () => {
+    // Cria o editor
     editor = monaco.editor.create(document.getElementById('editor'), {
         value: `{{CONTENT}}`,
         language: '{{LANGUAGE}}',
@@ -17,18 +20,19 @@ require(['vs/editor/editor.main'], function () {
             sendSave();
         }
     });
-});
 
-// Troca de linguagem
-document.getElementById('language').addEventListener('change', (event) => {
-    const newLanguage = event.target.value;
-    if (editor) {
-        monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
-    }
-});
+    // Troca de linguagem
+    const languageSelect = document.getElementById('language');
+    languageSelect.addEventListener('change', (event) => {
+        const newLanguage = event.target.value;
+        if (editor) {
+            monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
+        }
+    });
 
-// Botão salvar
-document.querySelector('.btn').addEventListener('click', sendSave);
+    // Botão salvar
+    document.querySelector('.btn').addEventListener('click', sendSave);
+});
 
 function sendSave() {
     vscode.postMessage({
