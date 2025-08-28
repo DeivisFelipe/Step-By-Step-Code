@@ -4,154 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <title>${item.title}</title>
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0 20px;
-            font-family: sans-serif;
-            background: #1e1e1e;
-            color: #fff;
-        }
-
-        h3 span {
-            font-weight: normal;
-        }
-
-        #editor {
-            width: 100%;
-            height: 500px;
-            border: 1px solid #444;
-        }
-
-        label {
-            margin-right: 10px;
-        }
-
-        select,
-        input[type="number"] {
-            padding: 5px;
-            margin-right: 15px;
-        }
-
-        .switch-label {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-
-        .switch-label input {
-            margin-right: 10px;
-        }
-
-        #controls {
-            margin-top: 10px;
-        }
-
-        button {
-            padding: 8px 16px;
-            margin-top: 15px;
-            cursor: pointer;
-            background-color: #007acc;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: #005a9e;
-        }
-
-        #animation-time {
-            display: none;
-            width: 60px;
-        }
-    </style>
+    <link rel="stylesheet" href="editor.css">
     <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
 </head>
 
 <body>
+    <header>
+        <h1>Edição do passo</h1>
+    </header>
 
-    <h3><span>Passo:</span> <span style="font-size: 1.5em">${item.title}</span></h3>
+    <h2>
+        Passo: ${item.title}
+    </h2>
 
     <div id="controls">
-        <label for="language">Linguagem:</label>
-        <select id="language">
-            <option value="javascript">JavaScript</option>
-            <option value="typescript">TypeScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="csharp">C#</option>
-        </select>
+        <div>
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="csharp">C#</option>
+            </select>
+        </div>
 
-        <label class="switch-label">
-            <input type="checkbox" id="delete-previous"> Deletar conteúdo anterior
+        <label>
+            <input type="checkbox" id="delete-previous"> Delete previous content
         </label>
-        <label class="switch-label">
-            <input type="checkbox" id="keep-indentation"> Manter indentação
+        <label>
+            <input type="checkbox" id="keep-indentation"> Keep indentation
         </label>
-        <label class="switch-label">
-            <input type="checkbox" id="enable-animation"> Animação de escrita
+        <label>
+            <input type="checkbox" id="enable-animation"> Enable typing animation
             <input type="number" id="animation-time" min="10" value="50"> ms
         </label>
     </div>
 
     <div id="editor"></div>
 
-    <button id="saveBtn">💾 Salvar</button>
+    <button id="saveBtn">💾 Save</button>
 
-    <script>
-        const vscode = acquireVsCodeApi();
-        let editor;
-
-        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
-        require(['vs/editor/editor.main'], function () {
-            editor = monaco.editor.create(document.getElementById('editor'), {
-                value: ``,
-                language: 'javascript',
-                theme: 'vs-dark',
-                automaticLayout: true
-            });
-
-            // Atalho CTRL+S / CMD+S
-            window.addEventListener('keydown', (e) => {
-                if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-                    e.preventDefault();
-                    sendSave();
-                }
-            });
-        });
-
-        // Troca de linguagem
-        document.getElementById('language').addEventListener('change', (event) => {
-            const newLanguage = event.target.value;
-            if (editor) {
-                monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
-            }
-        });
-
-        // Mostrar input de tempo apenas se animação estiver ativa
-        document.getElementById('enable-animation').addEventListener('change', (e) => {
-            document.getElementById('animation-time').style.display = e.target.checked ? 'inline-block' : 'none';
-        });
-
-        // Botão salvar
-        document.getElementById('saveBtn').addEventListener('click', sendSave);
-
-        function sendSave() {
-            vscode.postMessage({
-                command: 'save',
-                content: editor ? editor.getValue() : '',
-                deletePrevious: document.getElementById('delete-previous').checked,
-                keepIndentation: document.getElementById('keep-indentation').checked,
-                enableAnimation: document.getElementById('enable-animation').checked,
-                animationTime: parseInt(document.getElementById('animation-time').value || 50)
-            });
-        }
-    </script>
-
+    <script src="editor.js"></script>
 </body>
 
 </html>
