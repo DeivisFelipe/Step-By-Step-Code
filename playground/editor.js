@@ -27,13 +27,8 @@ document.getElementById('language').addEventListener('change', (event) => {
     }
 });
 
-// Mostrar input de tempo apenas se animação estiver ativa
-document.getElementById('enable-animation').addEventListener('change', (e) => {
-    document.getElementById('animation-time').style.display = e.target.checked ? 'inline-block' : 'none';
-});
-
 // Botão salvar
-document.getElementById('saveBtn').addEventListener('click', sendSave);
+document.querySelector('.btn').addEventListener('click', sendSave);
 
 function sendSave() {
     vscode.postMessage({
