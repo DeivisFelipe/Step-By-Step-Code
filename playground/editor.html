@@ -29,16 +29,35 @@
             </select>
         </div>
 
-        <label>
-            <input type="checkbox" id="delete-previous"> Delete previous content
-        </label>
-        <label>
-            <input type="checkbox" id="keep-indentation"> Keep indentation
-        </label>
-        <label>
-            <input type="checkbox" id="enable-animation"> Enable typing animation
-            <input type="number" id="animation-time" min="10" value="50"> ms
-        </label>
+        <div class="switch-block">
+            <input type="checkbox" id="delete-previous">
+            <label class="switch-label" for="delete-previous">
+                <div class="switch">
+                    <div class="switch-slider"></div>
+                </div>
+            </label>
+            <label class="switch-label" for="delete-previous">Delete previous content</label>
+        </div>
+
+        <div class="switch-block">
+            <input type="checkbox" id="keep-indentation">
+            <label class="switch-label" for="keep-indentation">
+                <div class="switch">
+                    <div class="switch-slider"></div>
+                </div>
+            </label>
+            <label class="switch-label" for="keep-indentation">Keep indentation</label>
+        </div>
+
+        <div class="switch-block">
+            <input type="checkbox" id="enable-animation">
+            <label class="switch-label" for="enable-animation">
+                <div class="switch">
+                    <div class="switch-slider"></div>
+                </div>
+            </label>
+            <label class="switch-label" for="enable-animation">Enable typing animation</label>
+        </div>
     </div>
 
     <div id="editor"></div>

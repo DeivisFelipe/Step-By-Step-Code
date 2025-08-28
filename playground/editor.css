@@ -55,13 +55,57 @@ label[for="language"] {
 }
 
 /* Estilo do switch */
-.switch-label {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-    cursor: pointer;
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
 }
 
-.switch-label input {
-    margin-right: 10px;
+.switch-block {
+    display: flex;
+    align-items: center;
+}
+
+.switch-block label:nth-of-type(2) {
+    margin-left: 20px;
+}
+
+.switch-block input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    transition: .4s;
+    border-radius: 34px;
+    border: 0px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: rgb(68, 68, 68);
+    transition: .4s;
+    border-radius: 26px;
+}
+
+input:checked+.switch-label .switch-slider {
+    background-color: #29cc00;
+}
+
+input:checked+.switch-label .switch-slider:before {
+    transform: translateX(26px);
 }
