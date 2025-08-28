@@ -130,7 +130,7 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
             }
         );
 
-        panel.webview.html = this.getWebviewContent(item);
+        panel.webview.html = this.getWebviewContent(item, panel);
 
         panel.webview.onDidReceiveMessage(
             message => {
@@ -148,18 +148,35 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         );
     }
 
-    private getWebviewContent(item: StepItem): string {
+    private getWebviewContent(item: StepItem, panel: vscode.WebviewPanel): string {
         const escaped = item.content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-        const htmlPath = path.join(__dirname, '/../webview', 'editor.html');
+        // Ler o HTML
+        const htmlPath = path.join(__dirname, '../webview/editor.html');
         let html = fs.readFileSync(htmlPath, 'utf8');
 
+        // Caminhos dos arquivos CSS e JS
+        const cssPath = vscode.Uri.file(path.join(__dirname, '../webview/editor.css'));
+        const jsPath = vscode.Uri.file(path.join(__dirname, '../webview/editor.js'));
+
+        // Transformar em URIs que o Webview consegue carregar
+        const cssUri = panel.webview.asWebviewUri(cssPath);
+        const jsUri = panel.webview.asWebviewUri(jsPath);
+
+        // Adicionar Content Security Policy
+        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src ${panel.webview.cspSource} https:;">`;
+
+        // Substituir todos os placeholders
         html = html.replace(/{{TITLE}}/g, item.title)
             .replace(/{{CONTENT}}/g, escaped)
-            .replace(/{{LANGUAGE}}/g, item.language);
+            .replace(/{{CSS_URI}}/g, cssUri.toString())
+            .replace(/{{JS_URI}}/g, jsUri.toString())
+            .replace('{{CSP_META}}', cspMeta);
 
         return html;
     }
+
+
 
     executeStep(item: StepItem): void {
         this.currentIndex = item.index;
