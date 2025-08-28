@@ -142,11 +142,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ && cp -r src/webview out/webview",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
+    "vscode:prepublish": "npm run compile",
     "lint": "eslint src",
+    "pretest": "npm run compile && npm run lint",
     "test": "vscode-test"
   },
   "devDependencies": {
