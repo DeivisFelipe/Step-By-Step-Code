@@ -22,7 +22,7 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
     getChildren(): Thenable<StepItem[]> {
         return Promise.resolve(
             this.steps.map((step: StepItem) => {
-                const prefix = step.index === this.currentIndex ? '➡️ ' : '';
+                const prefix = step.index === this.currentIndex ? '$(arrow-right) ' : '';
                 const sufix = step.content ? '' : ' (vazio)';
                 const item = new StepItem(prefix + step.label + sufix, step.title, step.content, step.index);
 
@@ -158,10 +158,12 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         // Caminhos dos arquivos CSS e JS
         const cssPath = vscode.Uri.file(path.join(__dirname, '../webview/editor.css'));
         const jsPath = vscode.Uri.file(path.join(__dirname, '../webview/editor.js'));
+        const fontPath = vscode.Uri.file(path.join(__dirname, '../webview/codicon.ttf'));
 
         // Transformar em URIs que o Webview consegue carregar
         const cssUri = panel.webview.asWebviewUri(cssPath);
         const jsUri = panel.webview.asWebviewUri(jsPath);
+        const fontUri = panel.webview.asWebviewUri(fontPath);
 
         const monacoPath = vscode.Uri.file(
             path.join(__dirname, '../webview/monaco')
@@ -169,7 +171,7 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         const monacoUri = panel.webview.asWebviewUri(monacoPath);
 
         // Adicionar Content Security Policy
-        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src ${panel.webview.cspSource} https:;">`;
+        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src ${panel.webview.cspSource} https:; font-src ${panel.webview.cspSource};">`;
 
         // Substituir todos os placeholders
         html = html.replace(/{{TITLE}}/g, item.title)
@@ -177,7 +179,8 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
             .replace(/{{CSS_URI}}/g, cssUri.toString())
             .replace(/{{JS_URI}}/g, jsUri.toString())
             .replace('{{CSP_META}}', cspMeta)
-            .replace('{{MONACO_URI}}', monacoUri.toString());
+            .replace('{{MONACO_URI}}', monacoUri.toString())
+            .replace(/url\("\.\/codicon\.ttf"\)/g, `url("${fontUri.toString()}")`);
 
         return html;
     }

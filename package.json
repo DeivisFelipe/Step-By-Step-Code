@@ -25,7 +25,7 @@
         {
           "id": "stepPanel",
           "title": "Passos",
-          "icon": "media/icon.svg"
+          "icon": "$(list-ordered)"
         }
       ]
     },
@@ -41,58 +41,37 @@
       {
         "command": "stepByStep.addStep",
         "title": "Adicionar Passo",
-        "icon": {
-          "light": "media/add-dark.svg",
-          "dark": "media/add-dark.svg"
-        }
+        "icon": "$(add)"
       },
       {
         "command": "stepByStep.nextStep",
         "title": "Próximo Passo",
-        "icon": {
-          "light": "media/next-dark.svg",
-          "dark": "media/next-dark.svg"
-        }
+        "icon": "$(arrow-down)"
       },
       {
         "command": "stepByStep.prevStep",
         "title": "Passo Anterior",
-        "icon": {
-          "light": "media/prev-dark.svg",
-          "dark": "media/prev-dark.svg"
-        }
+        "icon": "$(arrow-up)"
       },
       {
         "command": "stepByStep.resetSteps",
         "title": "Resetar Passos",
-        "icon": {
-          "light": "media/reset-dark.svg",
-          "dark": "media/reset-dark.svg"
-        }
+        "icon": "$(refresh)"
       },
       {
         "command": "stepByStep.deleteStep",
         "title": "Excluir Passo",
-        "icon": {
-          "light": "media/trash-dark.svg",
-          "dark": "media/trash-dark.svg"
-        }
+        "icon": "$(trash)"
       },
       {
         "command": "stepByStep.renameStep",
         "title": "Renomear Passo",
-        "icon": {
-          "light": "media/rename-dark.svg",
-          "dark": "media/rename-dark.svg"
-        }
+        "icon": "$(edit)"
       },
       {
         "command": "stepByStep.editStep",
         "title": "Editar Passo",
-        "icon": {
-          "light": "media/edit-dark.svg",
-          "dark": "media/edit-dark.svg"
-        }
+        "icon": "$(pencil)"
       },
       {
         "command": "stepByStep.executeStep",
@@ -161,6 +140,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.40",
     "monaco-editor": "^0.52.2"
   }
 }

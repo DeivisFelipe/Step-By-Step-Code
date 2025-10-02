@@ -1,3 +1,9 @@
+/* Fonte dos Codicons */
+@font-face {
+    font-family: "codicon";
+    src: url("./codicon.ttf") format("truetype");
+}
+
 html,
 body {
     height: 100%;
@@ -100,8 +106,26 @@ input:checked+.switch-label .switch-slider:before {
     border: none;
     border-radius: 10px;
     font-size: medium;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn:hover {
     background-color: #096301;
 }
+
+/* Estilos para Codicons */
+.codicon {
+    font-family: "codicon";
+    font-size: 16px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-decoration: none;
+    text-transform: none;
+    vertical-align: text-top;
+}
+
+.codicon-save:before { content: "\eab3"; }
