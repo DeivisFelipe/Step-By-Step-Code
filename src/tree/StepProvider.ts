@@ -22,7 +22,7 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
     getChildren(): Thenable<StepItem[]> {
         return Promise.resolve(
             this.steps.map((step: StepItem) => {
-                const prefix = step.index === this.currentIndex ? '$(arrow-right) ' : '';
+                const prefix = step.index === this.currentIndex ? '▶ ' : '';
                 const sufix = step.content ? '' : ' (vazio)';
                 const item = new StepItem(prefix + step.label + sufix, step.title, step.content, step.index);
 
@@ -44,13 +44,21 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
             const step = new StepItem(title, title, '', this.steps.length);
             this.steps.push(step);
             this.refresh();
+            
+            // Abrir automaticamente a tela de edição
+            await this.editStep(step);
         }
     }
 
     nextStep(): void {
         if (this.currentIndex < this.steps.length - 1) {
             this.currentIndex++;
-            this.insertStepContent();
+            const step = this.steps[this.currentIndex];
+            this.insertStepContent({
+                deletePrevious: step?.deletePrevious,
+                keepIndentation: step?.keepIndentation,
+                enableAnimation: step?.enableAnimation
+            });
             this.refresh();
         }
     }
@@ -58,12 +66,17 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
     prevStep(): void {
         if (this.currentIndex > 0) {
             this.currentIndex--;
-            this.insertStepContent();
+            const step = this.steps[this.currentIndex];
+            this.insertStepContent({
+                deletePrevious: step?.deletePrevious,
+                keepIndentation: step?.keepIndentation,
+                enableAnimation: step?.enableAnimation
+            });
             this.refresh();
         }
     }
 
-    private insertStepContent(): void {
+    private insertStepContent(options?: { deletePrevious?: boolean, keepIndentation?: boolean, enableAnimation?: boolean }): void {
         const editor = vscode.window.activeTextEditor;
 
         if (!editor) {
@@ -77,18 +90,85 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         }
 
         const step = this.steps[this.currentIndex];
-        if (!step) return;
+        if (!step) {
+            return;
+        }
 
         if (!step.content) {
             vscode.window.showErrorMessage('O passo selecionado não possui conteúdo para inserir.');
             return;
         }
 
+        let content = step.content;
         const position = editor.selection.active;
+        const line = editor.document.lineAt(position.line);
 
-        editor.edit(editBuilder => {
-            editBuilder.insert(position, step.content + '\n');
-        });
+        // Keep indentation: usar a indentação baseada na posição atual do cursor
+        if (options?.keepIndentation) {
+            const currentColumn = position.character;
+            const baseIndent = ' '.repeat(currentColumn);
+            content = content.split('\n').map((lineContent, index) => {
+                return index === 0 ? lineContent : baseIndent + lineContent;
+            }).join('\n');
+        }
+
+        if (options?.enableAnimation) {
+            // Usar animação de digitação
+            this.typeContentSlowly(editor, position, content, options);
+        } else {
+            // Inserção normal
+            editor.edit(editBuilder => {
+                // Delete previous: apagar conteúdo da linha atual
+                if (options?.deletePrevious && line.text.trim()) {
+                    const lineRange = line.range;
+                    editBuilder.delete(lineRange);
+                    editBuilder.insert(lineRange.start, content);
+                } else {
+                    editBuilder.insert(position, content + '\n');
+                }
+            });
+        }
+    }
+
+    private async typeContentSlowly(editor: vscode.TextEditor, startPosition: vscode.Position, content: string, options: any): Promise<void> {
+        const delay = 50; // ms entre cada caractere
+        let currentPosition = startPosition;
+        
+        // Se delete previous está ativado, primeiro limpar a linha
+        if (options?.deletePrevious) {
+            const line = editor.document.lineAt(startPosition.line);
+            if (line.text.trim()) {
+                await editor.edit(editBuilder => {
+                    editBuilder.delete(line.range);
+                });
+                currentPosition = new vscode.Position(startPosition.line, 0);
+            }
+        }
+        
+        // Digitar caractere por caractere
+        for (let i = 0; i < content.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            
+            const char = content[i];
+            
+            await editor.edit(editBuilder => {
+                editBuilder.insert(currentPosition, char);
+            });
+            
+            // Atualizar posição baseada no caractere inserido
+            if (char === '\n') {
+                currentPosition = new vscode.Position(currentPosition.line + 1, 0);
+            } else {
+                currentPosition = new vscode.Position(currentPosition.line, currentPosition.character + 1);
+            }
+        }
+        
+        // Adicionar nova linha ao final se não terminar com quebra de linha
+        if (!content.endsWith('\n')) {
+            await editor.edit(editBuilder => {
+                editBuilder.insert(currentPosition, '\n');
+            });
+        }
     }
 
     resetSteps(): void {
@@ -126,7 +206,8 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                retainContextWhenHidden: true
+                retainContextWhenHidden: true,
+                localResourceRoots: [vscode.Uri.file(path.join(__dirname, '../webview'))]
             }
         );
 
@@ -138,8 +219,15 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
                     const step = this.steps[item.index];
                     if (step) {
                         step.content = message.content;
+                        step.language = message.language || 'javascript';
+                        step.deletePrevious = message.deletePrevious || false;
+                        step.keepIndentation = message.keepIndentation || false;
+                        step.enableAnimation = message.enableAnimation || false;
                         this.refresh();
                         vscode.window.showInformationMessage(`Conteúdo do passo "${step.title}" salvo.`);
+                        
+                        // Fechar o painel após salvar
+                        panel.dispose();
                     }
                 }
             },
@@ -165,21 +253,19 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         const jsUri = panel.webview.asWebviewUri(jsPath);
         const fontUri = panel.webview.asWebviewUri(fontPath);
 
-        const monacoPath = vscode.Uri.file(
-            path.join(__dirname, '../webview/monaco')
-        );
-        const monacoUri = panel.webview.asWebviewUri(monacoPath);
-
-        // Adicionar Content Security Policy
-        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src ${panel.webview.cspSource} https:; font-src ${panel.webview.cspSource};">`;
+        // Adicionar Content Security Policy mais permissivo para o Monaco
+        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${panel.webview.cspSource} https: data:; style-src ${panel.webview.cspSource} 'unsafe-inline'; script-src ${panel.webview.cspSource} 'unsafe-eval' 'unsafe-inline'; font-src ${panel.webview.cspSource};">`;
 
         // Substituir todos os placeholders
         html = html.replace(/{{TITLE}}/g, item.title)
             .replace(/{{CONTENT}}/g, escaped)
+            .replace(/{{LANGUAGE}}/g, item.language)
+            .replace(/{{DELETE_PREVIOUS}}/g, item.deletePrevious ? 'checked' : '')
+            .replace(/{{KEEP_INDENTATION}}/g, item.keepIndentation ? 'checked' : '')
+            .replace(/{{ENABLE_ANIMATION}}/g, item.enableAnimation ? 'checked' : '')
             .replace(/{{CSS_URI}}/g, cssUri.toString())
             .replace(/{{JS_URI}}/g, jsUri.toString())
             .replace('{{CSP_META}}', cspMeta)
-            .replace('{{MONACO_URI}}', monacoUri.toString())
             .replace(/url\("\.\/codicon\.ttf"\)/g, `url("${fontUri.toString()}")`);
 
         return html;
@@ -189,7 +275,12 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
 
     executeStep(item: StepItem): void {
         this.currentIndex = item.index;
-        this.insertStepContent();
+        const step = this.steps[this.currentIndex];
+        this.insertStepContent({
+            deletePrevious: step?.deletePrevious,
+            keepIndentation: step?.keepIndentation,
+            enableAnimation: step?.enableAnimation
+        });
         this.refresh();
     }
 }

@@ -1,73 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{TITLE}}</title>
     {{CSP_META}}
     <link rel="stylesheet" href="{{CSS_URI}}">
-    </link>
 </head>
 
 <body>
     <header>
-        <h1>Edição do passo</h1>
+        <h1>Edição do Passo</h1>
     </header>
 
-    <h2>
-        Passo: {{TITLE}}
-    </h2>
+    <h2>Passo: {{TITLE}}</h2>
 
     <div id="controls">
-        <div>
-            <label for="language">Language:</label>
+        <div class="language-section">
+            <label for="language">Linguagem:</label>
             <select id="language">
                 <option value="javascript">JavaScript</option>
                 <option value="typescript">TypeScript</option>
                 <option value="python">Python</option>
                 <option value="java">Java</option>
                 <option value="csharp">C#</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="json">JSON</option>
+                <option value="markdown">Markdown</option>
+                <option value="sql">SQL</option>
             </select>
         </div>
 
-        <div class="switch-block">
-            <input type="checkbox" id="delete-previous">
-            <label class="switch-label" for="delete-previous">
-                <div class="switch">
-                    <div class="switch-slider"></div>
-                </div>
-            </label>
-            <label class="switch-label" for="delete-previous">Delete previous content</label>
-        </div>
+        <div class="options-section">
+            <div class="switch-block">
+                <input type="checkbox" id="delete-previous" {{DELETE_PREVIOUS}}>
+                <label class="switch-label" for="delete-previous">
+                    <div class="switch">
+                        <div class="switch-slider"></div>
+                    </div>
+                </label>
+                <label class="switch-label" for="delete-previous">Substituir conteúdo existente</label>
+            </div>
 
-        <div class="switch-block">
-            <input type="checkbox" id="keep-indentation">
-            <label class="switch-label" for="keep-indentation">
-                <div class="switch">
-                    <div class="switch-slider"></div>
-                </div>
-            </label>
-            <label class="switch-label" for="keep-indentation">Keep indentation</label>
-        </div>
+            <div class="switch-block">
+                <input type="checkbox" id="keep-indentation" {{KEEP_INDENTATION}}>
+                <label class="switch-label" for="keep-indentation">
+                    <div class="switch">
+                        <div class="switch-slider"></div>
+                    </div>
+                </label>
+                <label class="switch-label" for="keep-indentation">Manter indentação</label>
+            </div>
 
-        <div class="switch-block">
-            <input type="checkbox" id="enable-animation">
-            <label class="switch-label" for="enable-animation">
-                <div class="switch">
-                    <div class="switch-slider"></div>
-                </div>
-            </label>
-            <label class="switch-label" for="enable-animation">Enable typing animation</label>
+            <div class="switch-block">
+                <input type="checkbox" id="enable-animation" {{ENABLE_ANIMATION}}>
+                <label class="switch-label" for="enable-animation">
+                    <div class="switch">
+                        <div class="switch-slider"></div>
+                    </div>
+                </label>
+                <label class="switch-label" for="enable-animation">Animação de digitação</label>
+            </div>
         </div>
     </div>
 
     <div id="editor"></div>
 
-    <button class="btn"><i class="codicon codicon-save"></i> SAVE</button>
-
-    <script>
-        require.config({ paths: { vs: '{{MONACO_URI}}/vs' } });
-    </script>
+    <button class="btn">
+        <i class="codicon codicon-save"></i>
+        Salvar Passo
+    </button>
 
     <script src="{{JS_URI}}"></script>
 </body>
