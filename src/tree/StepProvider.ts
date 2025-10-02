@@ -261,7 +261,7 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         const fontUri = panel.webview.asWebviewUri(fontPath);
 
         // Adicionar Content Security Policy mais permissivo para o Monaco
-        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${panel.webview.cspSource} https: data:; style-src ${panel.webview.cspSource} 'unsafe-inline'; script-src ${panel.webview.cspSource} 'unsafe-eval' 'unsafe-inline'; font-src ${panel.webview.cspSource};">`;
+        const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${panel.webview.cspSource} https: data:; style-src ${panel.webview.cspSource} 'unsafe-inline' https:; script-src ${panel.webview.cspSource} 'unsafe-eval' 'unsafe-inline' https:; font-src ${panel.webview.cspSource} https:; connect-src https:;">`;
 
         // Substituir todos os placeholders
         html = html.replace(/{{TITLE}}/g, item.title)

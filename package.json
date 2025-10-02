@@ -16,7 +16,7 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -105,17 +105,17 @@
         {
           "command": "stepByStep.deleteStep",
           "when": "view == stepView",
-          "group": "inline"
+          "group": "inline@1"
         },
         {
           "command": "stepByStep.renameStep",
           "when": "viewItem == stepItem",
-          "group": "inline"
+          "group": "inline@2"
         },
         {
           "command": "stepByStep.editStep",
           "when": "viewItem == stepItem",
-          "group": "inline"
+          "group": "inline@3"
         }
       ]
     }
