@@ -101,7 +101,6 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
 
         let content = step.content;
         const position = editor.selection.active;
-        const line = editor.document.lineAt(position.line);
 
         // Keep indentation: usar a indentação baseada na posição atual do cursor
         if (options?.keepIndentation) {
@@ -118,11 +117,15 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         } else {
             // Inserção normal
             editor.edit(editBuilder => {
-                // Delete previous: apagar conteúdo da linha atual
-                if (options?.deletePrevious && line.text.trim()) {
-                    const lineRange = line.range;
-                    editBuilder.delete(lineRange);
-                    editBuilder.insert(lineRange.start, content);
+                // Delete previous: apagar TODO o conteúdo do arquivo
+                if (options?.deletePrevious) {
+                    const document = editor.document;
+                    const fullRange = new vscode.Range(
+                        document.positionAt(0),
+                        document.positionAt(document.getText().length)
+                    );
+                    editBuilder.delete(fullRange);
+                    editBuilder.insert(new vscode.Position(0, 0), content);
                 } else {
                     editBuilder.insert(position, content + '\n');
                 }
@@ -134,15 +137,19 @@ export default class StepProvider implements vscode.TreeDataProvider<StepItem> {
         const delay = 50; // ms entre cada caractere
         let currentPosition = startPosition;
         
-        // Se delete previous está ativado, primeiro limpar a linha
+        // Se delete previous está ativado, primeiro limpar TODO o arquivo
         if (options?.deletePrevious) {
-            const line = editor.document.lineAt(startPosition.line);
-            if (line.text.trim()) {
-                await editor.edit(editBuilder => {
-                    editBuilder.delete(line.range);
-                });
-                currentPosition = new vscode.Position(startPosition.line, 0);
-            }
+            const document = editor.document;
+            const fullRange = new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(document.getText().length)
+            );
+            
+            await editor.edit(editBuilder => {
+                editBuilder.delete(fullRange);
+            });
+            
+            currentPosition = new vscode.Position(0, 0);
         }
         
         // Digitar caractere por caractere
